@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance to serve my Flask application
+After=network.target
+
+[Service]
+User=gitlab-runner
+Group=www-data
+WorkingDirectory=PLACEHOLDER_WORKING_DIRECTORY
+ExecStart=PLACEHOLDER_EXEC_START
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,78 @@
+<!--myenv) jawwad@jumphost:~/InventoryDataHub/app/templates$ pwd welcome.html
+/home/jawwad/InventoryDataHub/app/templates -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Inventory Data Hub</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/idh_main_logo.ico') }}">
+</head>
+<body>
+
+<!--logo idh-logo and class="logo nokia-logo" are reference in the CSS FILE -->
+    <div class="header-container">
+        <img src="{{ url_for('static', filename='images/idh_main_logo.png') }}" alt="IDH Connect" class="logo idh-logo">
+        <h1>Welcome to Inventory Data Hub</h1>
+        <img src="{{ url_for('static', filename='images/nokia-icon-2.png') }}" alt="Nokia" class="logo nokia-logo">
+    </div>  
+
+    <div class="black-background">
+        <div class="black-background-text">
+            Designed to empower network professionals, this platform provides advanced tools for managing and visualizing NFMP reports. Achieve a deeper understanding of inventory levels and equipment specifics to streamline operations and enhance service effectiveness.
+        </div>   
+    </div>
+ 
+
+    <div class="body-container">
+        <div class="flex-container">   
+            <div class="content-box">
+                <h4>Please select the Excel or CSV files to upload.</h4>
+                <div class="dropdown-container">
+                    <label for="nfmp-select">Select Number of NFMP:</label>
+                    <select name="nfmp_mode" id="nfmp-select" class="dropdown">
+                        <option value="two_nfmp">Two NFMP</option>
+                        <option value="one_nfmp">One NFMP</option>
+                    </select>
+                </div>         
+                <form id="file-upload-form" action="/validate" method="post" enctype="multipart/form-data">
+                    <div class="file-upload-container">
+                        <label for="file-upload-input" class="custom-file-upload">
+                            Choose Files
+                        </label>
+                        <input type="file" name="inventory_files" id="file-upload-input" accept=".xls,.xlsx,.csv" multiple>
+                        <input type="submit" value="Upload Files" class="upload-button">
+                    </div>
+                </form>
+                
+                <div id="notification-area" style="margin-top: 15px; color: red;"></div>
+            </div>
+
+            <div class="report-box">
+                <h3>Reports</h3>
+                <div id="report-links">
+            <ul>
+                
+                <li><a href="{{ url_for('sfp.sfp_report_route') if links_enabled else '#' }}" class="report-link" id="sfp-report-link">SFPs Report</a></li>
+                <li><a href="{{ url_for('card.card_render_route') if links_enabled else '#' }}" class="report-link" id="line-card-report-link">Cards Report</a></li>
+                <li><a href="{{ url_for('shelf_fan.shelf_fan_render_route') if links_enabled else '#' }}" class="report-link" id="shelf-fan-report-link">Shelf & Fan Report</a></li>
+                <li><a href="{{ url_for('power_module.power_module_render_route') if links_enabled else '#' }}" class="report-link" id="power-module-report-link">Power Modules Report</a></li>
+                <li><a href="{{ url_for('flash_memory.flash_memory_render_route') if links_enabled else '#' }}" class="report-link" id="sc-cards-report-link">CF  Memory Reports</a></li>
+                <li><a href="{{ url_for('summary.summary_render_route') if links_enabled else '#' }}" class="report-link" id="summary-reports-link">Summary Reports</a></li>
+                
+            </ul>
+                </div>
+    </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/file_validation.js') }}"></script>
+</body>
+</html>
+
+
+
+
+
+
+

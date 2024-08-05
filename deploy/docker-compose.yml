@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  idh_container:
+    image: inventorydatahub  # The Docker image for the IDH container
+    build:
+      context: .. # The Docker image for the IDH container
+      dockerfile: deploy/idh-docker/Dockerfile
+    volumes:
+      - idh_logs:/var/log/IDHLogs
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+          cpus: '4.0'
+
+  nginx_container:
+    image: my-nginx-image   # The Docker image for the Nginx container
+    build:
+      context: ..
+      dockerfile: deploy/nginx-docker/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - idh_container
+    volumes:
+      - nginx_logs:/var/log/nginx
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+          cpus: '4.0'
+
+networks:
+  myappnetwork:
+    driver: bridge
+    external: true
+
+volumes:
+  idh_logs:
+  nginx_logs:

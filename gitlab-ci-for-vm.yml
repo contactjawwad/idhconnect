@@ -1,0 +1,117 @@
+stages:
+    - setup
+    - test
+    - deploy
+    - cleanup
+
+cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - myenv-1/
+
+before_script:
+    - python3 -m venv myenv-1
+    - source myenv-1/bin/activate
+    - export PYTHONPATH=$PWD:$PYTHONPATH
+
+install_dependencies:
+    stage: setup
+    script:
+      - pip install -r requirements.txt
+    tags:
+      - setup
+
+
+syntax_validation:
+  stage: test
+  script:
+    - pip install flake8
+    - flake8 --exclude=myenv-1,static --ignore=E111,E112,E114,E116,E117,E121,E122,E201,E203,E211,E222,E225,E231,E241,E261,E262,E265,E271,E301,E302,E302,E303,E303,E305,E306,E501,E712,F401,F841,W291,W292,W293,W391
+  tags:
+    - syntax
+
+unit_and_integration_tests:
+    stage: test
+    script:
+      - export PYTHONPATH=$PWD:$PYTHONPATH  # Ensuring Python includes the current working directory in its search path
+      - pytest tests/
+    tags:
+      - test
+
+deploy_app:
+    stage: deploy
+    script:
+
+      - echo "Verifying Gunicorn installation..."
+      - gunicorn --version  # Verify Gunicorn is installed
+      - echo "Gunicorn installation verified."
+      
+      # Remove existing nginx configuration and service if they exist
+      - sudo rm -f /etc/nginx/sites-enabled/default || true
+      - sudo systemctl stop nginx || true
+      - sudo systemctl disable nginx || true
+      - sudo rm -f /etc/nginx/sites-available/myapp || true
+      - sudo rm -f /etc/nginx/sites-enabled/myapp || true
+      - sudo rm -f /etc/systemd/system/myapp.service || true
+      - sudo systemctl daemon-reload || true
+
+      # Installation and configuration steps...
+
+      - sudo apt-get update -y
+      - sudo apt-get install -y nginx
+      - echo "Configuring nginx..."
+      - sed -i "s|proxy_pass http://localhost:8000;|proxy_pass http://unix:$CI_PROJECT_DIR/myapp.sock;|g" deploy/nginx_config
+      - sudo cp deploy/nginx_config /etc/nginx/sites-available/myapp
+      - sudo ln -sf /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
+      - sudo systemctl restart nginx
+
+      # Setting up the systemd service
+      - sudo cp -f deploy/myapp.service /etc/systemd/system/myapp.service
+      - sudo sed -i "s|PLACEHOLDER_WORKING_DIRECTORY|$CI_PROJECT_DIR|g" /etc/systemd/system/myapp.service
+      - sudo sed -i "s|PLACEHOLDER_EXEC_START|/bin/bash -c 'umask 007; exec $CI_PROJECT_DIR/myenv-1/bin/gunicorn --workers 3 --bind unix:$CI_PROJECT_DIR/myapp.sock -m 007 \"app:create_app()\"'|g" /etc/systemd/system/myapp.service
+
+    # Ensure directory and socket permissions
+      - sudo find $CI_PROJECT_DIR -type d -exec chmod +x {} \;
+      - sudo chown -R gitlab-runner:www-data $CI_PROJECT_DIR
+      - sudo chmod -R 775 $CI_PROJECT_DIR
+      - sudo find /home/gitlab-runner/builds -type d -exec chmod +x {} \;
+      - sudo systemctl daemon-reload
+
+    # Unmasking, enabling, and starting the service
+      - sudo systemctl unmask myapp.service || true
+      - sudo systemctl enable myapp.service
+      - sudo systemctl start myapp.service
+      # Set socket permissions after Gunicorn starts
+       # Wait for Gunicorn to start and create the socket file
+      - sleep 10
+      - if [ -e "$CI_PROJECT_DIR/myapp.sock" ]; then sudo chmod 770 $CI_PROJECT_DIR/myapp.sock; else echo "Socket file not found"; exit 1; fi
+
+    only:
+      - staging
+    tags:
+      - deploy
+
+cleanup_app:
+    stage: cleanup
+    script:
+      - echo "Stopping application service..."
+      - sudo systemctl stop myapp.service || true
+      - echo "Disabling application service..."
+      - sudo systemctl disable myapp.service || true
+      - echo "Removing systemd service file..."
+      - sudo rm -f /etc/systemd/system/myapp.service || true
+      - echo "Removing nginx configurations..."
+      - sudo rm -f /etc/nginx/sites-available/myapp || true
+      - sudo rm -f /etc/nginx/sites-enabled/myapp || true
+      - sudo systemctl restart nginx || true
+      - echo "Cleaning up virtual environment..."
+      - rm -rf $CI_PROJECT_DIR/myenv-1 || true
+      - echo "System cleanup and daemon reload..."
+      - sudo systemctl daemon-reload || true
+      - echo "Removing remaining project files..."
+      - rm -rf $CI_PROJECT_DIR/* || true
+    when: manual
+    only:
+      - staging
+    tags:
+      - cleanup

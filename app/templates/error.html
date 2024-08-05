@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Inventory Data Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/idh_main_logo.ico') }}">
+
+    <style>
+        .center-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px; /* Adjust this value to control the spacing */
+            
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="header-container">
+        <img src="{{ url_for('static', filename='images/idh_main_logo.png') }}" alt="IDH Connect" class="logo idh-logo">
+        <h1>{{ title }}</h1>
+        <img src="{{ url_for('static', filename='images/nokia-icon-2.png') }}" alt="Nokia" class="logo nokia-logo">
+    </div>  
+
+    <div>
+        <p></p>
+
+        <h3 style="color: red;">{{ error_message|safe }}</h3>
+        <div class="center-button">
+            <button class="upload-button" onclick="window.location.href='/'">Return to Upload</button>
+        </div>
+        <p></p>
+    </div>
+
+   
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Ignore Python bytecode
+**/__pycache__/
+*.pyc
+
+# Ignore secret keys
+app/secret/
+myenv/
+*.swp

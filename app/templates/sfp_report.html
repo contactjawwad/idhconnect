@@ -1,0 +1,52 @@
+<!--myenv) jawwad@jumphost:~/InventoryDataHub/app/templates/sfp_report.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reports.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/idh_main_logo.ico') }}">    
+    <!-- Link to the AG Grid CSS files for styling the grid and applying the Alpine theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css">
+
+    <!-- Load AG Grid Community scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+    <!-- Load ExcelJS script, which is used for generating and manipulating Excel files in JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+
+
+
+</head>
+<body>
+    <div class="header-container">
+        <img src="{{ url_for('static', filename='images/idh_main_logo.png') }}" alt="IDH Connect" class="logo idh-logo">
+        <h1>{{ title }}</h1>
+        <img src="{{ url_for('static', filename='images/nokia-icon-2.png') }}" alt="Nokia" class="nokia-logo">
+    </div>
+
+    <h2>SFP Modules Main Report</h2>
+    <div id="myGrid" class="ag-theme-alpine"></div>
+ 
+    <h5>Summary </span></h5>
+    <div id="summaryGrid" class="ag-theme-alpine"></div>
+    <div id="notification" class="notification"></div>
+
+ <!-- Load sfp_report.js after AG Grid scripts  -->
+     
+    <script src="{{ url_for('static', filename='js/sfp_report.js') }}"></script>
+
+    <div class="button-container">
+        <button id="exportFullReport" class="upload-button" onclick="exportFullReport()">Export Full Main Report</button>
+    </div>
+     
+ 
+</body>
+</html>
+
+
+
