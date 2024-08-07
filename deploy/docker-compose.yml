@@ -7,6 +7,8 @@ services:
       dockerfile: deploy/idh-docker/Dockerfile
     volumes:
       - idh_logs:/var/log/IDHLogs
+    networks:
+      - myappnetwork
     deploy:
       resources:
         limits:
@@ -24,6 +26,8 @@ services:
       - idh_container
     volumes:
       - nginx_logs:/var/log/nginx
+    networks:
+      - myappnetwork
     deploy:
       resources:
         limits:
