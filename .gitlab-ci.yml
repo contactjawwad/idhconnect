@@ -2,6 +2,7 @@ stages:
   - check
   - build
   - test
+  - cleanup_after_test
   - deploy
   - cleanup
 
@@ -11,7 +12,7 @@ variables:
 
 before_script:
   # Ensure Docker is installed before logging in
-  - sudo apt-get update
+  
   - sudo apt-get install -y docker.io docker-compose
   - sudo docker --version
   - sudo docker-compose --version
@@ -45,6 +46,21 @@ test:
   tags:
     - test
 
+cleanup_after_test:
+  stage: cleanup_after_test
+  script:
+    # Clean up dangling images created during testing
+    - sudo docker image prune -f --filter "dangling=true"
+    # Remove untagged images that are not needed
+    - sudo docker images -q --filter "dangling=true" | xargs --no-run-if-empty sudo docker rmi
+    # Optionally remove other specific images if needed
+    # - sudo docker rmi -f $(sudo docker images | grep "<none>" | awk '{print $3}')
+  when: always
+  only:
+    - staging
+    - main
+  tags:
+    - cleanup
 deploy:
   stage: deploy
   script:
