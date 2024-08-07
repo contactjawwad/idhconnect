@@ -14,7 +14,7 @@ before_script:
   - sudo apt-get update
   - suso apt-get install -y docker.io docker-compose
   - sudo docker --version
-  - suo docker-compose --version
+  - sudo docker-compose --version
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
 
 check:
