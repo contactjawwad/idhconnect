@@ -8,7 +8,6 @@ RUN apk update && apk add --no-cache \
     gcc \
     libpq-dev
 
-
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
