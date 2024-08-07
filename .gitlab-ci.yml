@@ -9,10 +9,11 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_IMAGE_TAG: "1.0"
+  DOCKER_BUILDKIT: 1  # Enable BuildKit for efficient builds
 
 before_script:
   # Ensure Docker is installed before logging in
-  
+ 
   - sudo apt-get install -y docker.io docker-compose
   - sudo docker --version
   - sudo docker-compose --version
@@ -31,7 +32,7 @@ check:
 build:
   stage: build
   script:
-    - sudo docker-compose -f deploy/docker-compose.yml build --force-rm --no-cache
+    - DOCKER_BUILDKIT=1 sudo docker-compose -f deploy/docker-compose.yml build --force-rm --no-cache
   only:
     - staging
     - main
@@ -39,8 +40,8 @@ build:
 test:
   stage: test
   script:
-    
     - sudo docker-compose -f deploy/docker-compose.yml run --rm idh_container /bin/sh -c "export PYTHONPATH=/usr/src/app:\$PYTHONPATH && pytest tests/"
+    
   only:
     - staging
   tags:
@@ -52,9 +53,9 @@ cleanup_after_test:
     # Clean up dangling images created during testing
     - sudo docker image prune -f --filter "dangling=true"
     # Remove untagged images that are not needed
-    - sudo docker images -q --filter "dangling=true" | xargs --no-run-if-empty sudo docker rmi
-    # Optionally remove other specific images if needed
-    # - sudo docker rmi -f $(sudo docker images | grep "<none>" | awk '{print $3}')
+    
+    - sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
+    
   when: always
   only:
     - staging
