@@ -30,7 +30,7 @@ check:
 build:
   stage: build
   script:
-    - sudo docker-compose -f deploy/docker-compose.yml build
+    - sudo docker-compose -f deploy/docker-compose.yml build --force-rm --no-cache
   only:
     - staging
     - main
