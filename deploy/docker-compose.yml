@@ -5,6 +5,9 @@ services:
     build:
       context: .. # The Docker image for the IDH container
       dockerfile: deploy/idh-docker/Dockerfile
+      options:
+        --force-rm: true
+        --rm: true
     volumes:
       - idh_logs:/var/log/IDHLogs
     networks:
@@ -20,6 +23,9 @@ services:
     build:
       context: ..
       dockerfile: deploy/nginx-docker/Dockerfile
+      options:
+        --force-rm: true
+        --rm: true
     ports:
       - "80:80"
     depends_on:
