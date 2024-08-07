@@ -11,18 +11,18 @@ variables:
 
 before_script:
   # Ensure Docker is installed before logging in
-  - apt-get update
-  - apt-get install -y docker.io docker-compose
-  - docker --version
-  - docker-compose --version
+  - sudo apt-get update
+  - suso apt-get install -y docker.io docker-compose
+  - sudo docker --version
+  - suo docker-compose --version
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
 
 check:
   stage: check
   script:
     # You can retain the version checks here for verification
-    - docker --version
-    - docker-compose --version
+    - sudo docker --version
+    - sudo docker-compose --version
   only:
     - staging
     - main
@@ -30,7 +30,7 @@ check:
 build:
   stage: build
   script:
-    - docker-compose -f deploy/docker-compose.yml build
+    - sudo docker-compose -f deploy/docker-compose.yml build
   only:
     - staging
     - main
@@ -38,7 +38,7 @@ build:
 test:
   stage: test
   script:
-    - docker-compose -f deploy/docker-compose.yml run --rm idh_container pytest tests/
+    - sudo docker-compose -f deploy/docker-compose.yml run --rm idh_container pytest tests/
   only:
     - staging
   tags:
@@ -47,15 +47,15 @@ test:
 deploy:
   stage: deploy
   script:
-    - docker-compose -f deploy/docker-compose.yml up -d
-    - docker tag inventorydatahub contactjawwad/idh-app:idh-$DOCKER_IMAGE_TAG
-    - docker tag inventorydatahub contactjawwad/idh-app:idh-latest
-    - docker tag my-nginx-image contactjawwad/idh-app:nginx-$DOCKER_IMAGE_TAG
-    - docker tag my-nginx-image contactjawwad/idh-app:nginx-latest
-    - docker push contactjawwad/idh-app:idh-$DOCKER_IMAGE_TAG
-    - docker push contactjawwad/idh-app:idh-latest
-    - docker push contactjawwad/idh-app:nginx-$DOCKER_IMAGE_TAG
-    - docker push contactjawwad/idh-app:nginx-latest
+    - sudo docker-compose -f deploy/docker-compose.yml up -d
+    - sudo docker tag inventorydatahub contactjawwad/idh-app:idh-$DOCKER_IMAGE_TAG
+    - sudo docker tag inventorydatahub contactjawwad/idh-app:idh-latest
+    - sudo docker tag my-nginx-image contactjawwad/idh-app:nginx-$DOCKER_IMAGE_TAG
+    - sudo docker tag my-nginx-image contactjawwad/idh-app:nginx-latest
+    - sudo docker push contactjawwad/idh-app:idh-$DOCKER_IMAGE_TAG
+    - sudo docker push contactjawwad/idh-app:idh-latest
+    - sudo docker push contactjawwad/idh-app:nginx-$DOCKER_IMAGE_TAG
+    - sudo docker push contactjawwad/idh-app:nginx-latest
   only:
     - main
   tags:
@@ -65,13 +65,13 @@ cleanup_app:
   stage: cleanup
   script:
     # Stop and remove all Docker containers
-    - docker-compose -f deploy/docker-compose.yml down --rmi all
+    - sudo docker-compose -f deploy/docker-compose.yml down --rmi all
     # Remove all Docker images
-    - docker image prune -af
+    - sudo docker image prune -af
     # Optionally remove Docker volumes (uncomment if needed)
     # - docker volume prune -f
     # Remove any dangling images
-    - docker system prune -af
+    - sudo docker system prune -af
   when: manual
   only:
     - main
