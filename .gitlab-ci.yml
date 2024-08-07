@@ -12,7 +12,7 @@ variables:
 before_script:
   # Ensure Docker is installed before logging in
   - sudo apt-get update
-  - suso apt-get install -y docker.io docker-compose
+  - sudo apt-get install -y docker.io docker-compose
   - sudo docker --version
   - sudo docker-compose --version
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
