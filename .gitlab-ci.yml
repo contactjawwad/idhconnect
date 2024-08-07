@@ -55,6 +55,9 @@ cleanup_after_test:
     # Remove untagged images that are not needed
     
     - sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
+      # Remove specific base images if they are not needed
+    - sudo docker rmi python:3.9-alpine || true
+    - sudo docker rmi nginx:alpine || true
     
   when: always
   only:
