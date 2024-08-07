@@ -37,7 +37,6 @@ services:
 networks:
   myappnetwork:
     driver: bridge
-    external: true
 
 volumes:
   idh_logs:
