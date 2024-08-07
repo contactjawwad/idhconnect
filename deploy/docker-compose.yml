@@ -5,7 +5,8 @@ services:
     build:
       context: .. # The Docker image for the IDH container
       dockerfile: deploy/idh-docker/Dockerfile
-    
+      args:
+        - CACHEBUST=1  # Use this to bust cache intentionally when needed
     volumes:
       - idh_logs:/var/log/IDHLogs
     networks:
@@ -21,6 +22,8 @@ services:
     build:
       context: ..
       dockerfile: deploy/nginx-docker/Dockerfile
+      args:
+        - CACHEBUST=1  # Use this to bust cache intentionally when needed
     ports:
       - "80:80"
     depends_on:
