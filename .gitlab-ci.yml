@@ -89,10 +89,12 @@ cleanup_app:
     - sudo docker-compose -f deploy/docker-compose.yml down --rmi all
     # Remove all Docker images
     - sudo docker image prune -af
-    # Optionally remove Docker volumes (uncomment if needed)
-    # - docker volume prune -f
-    # Remove any dangling images
-    - sudo docker system prune -af
+    # Remove all Docker volumes
+    - sudo docker volume prune -f
+    # Remove all Docker networks not used by at least one container
+    - sudo docker network prune -f
+    # Remove any remaining dangling images and other system-wide data
+    - sudo docker system prune -af --volumes
   when: manual
   only:
     - main
