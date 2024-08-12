@@ -14,7 +14,7 @@ exec gunicorn "app:create_app()" \
   --bind 0.0.0.0:8000 \
   --workers $WORKERS \
   --threads 2 \
-  --worker-class gevent \
-  --timeout 500 \
+  --worker-class sync \
+  --timeout 300 \
   --max-requests 1000 \
   --max-requests-jitter 100
