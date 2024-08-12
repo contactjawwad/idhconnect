@@ -15,6 +15,8 @@ exec gunicorn "app:create_app()" \
   --workers $WORKERS \
   --threads 2 \
   --worker-class sync \
-  --timeout 300 \
+  --timeout 600 \
   --max-requests 1000 \
-  --max-requests-jitter 100
+  --max-requests-jitter 100 \
+  --log-level debug \
+  --error-logfile /var/log/gunicorn_error.log
