@@ -14,18 +14,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap');
 
-/* summary.css */
 body {
     margin: 0;
     padding: 0;
     font-family: "Quicksand", sans-serif;
     color: #333;
-    background-color: #f5f7fa; 
-    /*background-image: url('/static/images/home-bk.png'); /* Assuming you might want this uncommented */
-    background-size: cover; /* Scales the image to cover the entire body */
-    background-repeat: no-repeat; /* Prevents the background image from repeating */
-    background-position: center; /* Centers the background image */
-    background-attachment: fixed; /* Keeps the background image fixed during scrolling */
+    background-color: #f5f7fa;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
     max-width: 100%;
     overflow-x: hidden;
 }
@@ -34,7 +32,6 @@ html {
     max-width: 100%;
     overflow-x: hidden;
 }
-
 
 /* FOR horizontal and vertical cell lines in the AG Grid */
 .ag-theme-alpine div.ag-cell {
@@ -49,30 +46,27 @@ html {
     background-color: #6f96bc; 
     border: 1px solid #6f96bc; 
     border-radius: 5px; 
-    color: rgb(255, 255, 255); 
+    color: #fff; 
     font-family: "Dosis", sans-serif;
     font-size: 1rem; 
     text-align: center; 
     text-decoration: none;
     display: inline-block;
-    margin: 20px 3px 0; /* Added margin-top for space */
+    margin: 20px 3px 0; 
     transition: background-color 0.3s;
-} 
+}
 
- .upload-button:hover {
-    background-color: #0c2b4c; 
+.upload-button:hover {
+    background-color: #0c2b4c;
 }
 
 /* Centering button containers */
 .button-container {
     display: flex;
-    justify-content: center; /* Centers the buttons horizontally */
-    margin-top: 10px; /* Adjust space between grid and button as needed */
+    justify-content: center;
+    margin-top: 10px;
 }
 
-
-
-*****************************************************************************************/
 /*This img is making imagie icons to be place properly on proper distance to each other */
 img {
     float: left;
@@ -84,40 +78,36 @@ img {
     box-shadow: 2px 2px 8px 1px rgba(202, 210, 218, 0.7);
 }
 
-
-/* h2*/
+/* h2 */
 h2 {
     font-family: "Dosis", sans-serif;
-    font-size: 1.5rem; /* Adjust size as needed */
+    font-size: 1.5rem; 
     color: #333;
     text-align: center;
     margin: 20px 0;
 }
 
-
 #summaryGrid {
-    width: 60%; /* Adjust width as needed */
-    height: 400px; /* Adjust height as needed */
+    width: 60%; 
+    height: 400px; 
     margin: auto;
 }
-
 
 /* Notification styles */
 .notification {
     margin-top: 10px;
-    color: red; /* Default text color */
+    color: red; 
     padding: 10px;
     border-radius: 5px;
     z-index: 1000;
     display: none;
     text-align: center;
-    font-weight: bold; /* Make text bold */
+    font-weight: bold;
 }
 
 .notification.success {
-    color: green; /* Text color for success messages */
+    color: green;
 }
-
 
 .body-container {
     display: flex;
@@ -125,56 +115,50 @@ h2 {
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 20px;
-    padding: 60px 20px 20px; /* Top padding set to 60px, other sides to 20px */
+    padding: 60px 20px 20px;
     box-sizing: border-box;
     margin: auto;
-    width: 1270px; /* Specific width */
+    width: 100%; /* Adjusted for responsiveness */
+    max-width: 1270px;
 }
 
 .header-container {
     display: flex;
     align-items: center;
     justify-content: space-between; 
-    padding: 20px 50px; 
-    padding-left: 5px; 
+    padding: 20px 50px;
     background: #1d103b; 
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-    margin-bottom: 20px; 
-
+    margin-bottom: 20px;
 }
 
 .nokia-logo {
-    width: auto; /* Keeps the width flexible */
-    height: 50px; /* Restricts the height */
-    margin-left: auto; /* Positions the logo to the right */
-    border-radius: 0%; /* Ensures the logo remains non-oval */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Adds shadow for depth */
+    width: auto; 
+    height: 50px; 
+    margin-left: auto;
+    border-radius: 0%; 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .idh-logo {
     border-radius: 50%; 
     height: 80px; 
-    margin-right: auto;    
-} 
+    margin-right: auto;
+}
 
 h1 {
-    font-size: 40px;
-    color: rgb(255, 255, 255);
-    text-shadow: none;
-    margin: 0;
-    padding: 0;
-    flex-grow: 1; 
-    text-align: center; 
+    font-size: 2rem;
+    color: #fff;
     margin: 0 20px;
-    font-family: "Helvetica", sans-serif; /
-    /* font-family: "Quicksand", sans-serif; */
-
+    text-align: center;
+    font-family: "Helvetica", sans-serif;
 }
+
 .black-background {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 50px;  /* Simplified padding */
+    padding: 0 50px;
     background: black url('/static/images/idh_bk_logo.png') no-repeat center center / contain;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -190,27 +174,25 @@ h1 {
     justify-content: center;
     color: white;
     font-family: "DM Sans", sans-serif;
-    font-size: 25px;  /* Set font-size once */
+    font-size: 1.5rem; 
     line-height: 1.5;
     text-align: justify;
     margin: 0 auto;
-    padding: 32px 100px;  /* Simplified padding combining all padding settings */
+    padding: 32px 100px; 
     max-width: 1200px;
     background-color: rgba(0, 43, 76, 0.5);
     font-style: italic;
 }
 
-
-
 .section-container {
     margin-bottom: 20px;
 }
+
 .light-blue-row .ag-cell {
-    background-color: #dce6f1 !important; /* Light blue color */
+    background-color: #dce6f1 !important; 
     font-weight: bold;
     text-align: center;
 }
-
 
 .heading-cell {
     font-weight: bold;
@@ -219,6 +201,28 @@ h1 {
     grid-column: 1 / span 3;
 }
 
+@media screen and (min-width: 2560px) {
+    body {
+        font-size: 1.25rem;
+    }
 
+    #summaryGrid {
+        width: 80%; 
+    }
 
+    .body-container {
+        width: 90%;
+    }
 
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .black-background-text {
+        font-size: 1.75rem;
+    }
+}
