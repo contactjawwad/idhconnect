@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const gridOptions = {
         columnDefs: [
-            { headerName: "Site Name", field: "Site Name" },
+            { headerName: "Site Name", field: "Site Name",filter: true },
             { headerName: "Part Number", field: "Part Number", filter: true },
             { headerName: "Serial Number", field: "Serial Number", filter: true },
             { headerName: "Shelf Type", field: "Shelf Type", filter: true },
