@@ -52,7 +52,7 @@ class SFPModel:
             '3HE14835AA': 'SFP28 25GE LR - LC ROHS6/6 -40/85C',
             '3HE15272AA': 'QSFP56-DD - 400G FR4 2km 0/70C',
             '3HE16558AA': 'QSFP28 - 100GE ZR4 0/70C',
-            '3HE17069AA': 'QSFP28 - SFP TRANSCEIVER - TELECOM'
+        #'3HE17069AA': 'QSFP28 - SFP TRANSCEIVER - TELECOM'
         }
 
         
