@@ -64,7 +64,7 @@ class CardModel:
 
         # Remove duplicates by Serial Number
         data = data.drop_duplicates(subset=['Serial Number'], keep='first')
-           # Filter out rows with empty or 'N/A' values in Part Number column
+        # Filter out rows with empty or 'N/A' values in Part Number column
         data = data[data['Part Number'].notna()]  # Remove rows with NaN values
         data = data[data['Part Number'] != 'N/A']  # Remove rows with 'N/A' values
         data = data[data['Part Number'].str.strip() != '']  # Remove rows with empty strings
@@ -92,7 +92,7 @@ class CardModel:
 
         # Remove duplicates by Serial Number
         data = data.drop_duplicates(subset=['Serial Number'], keep='first')
-           # Filter out rows with empty or 'N/A' values in Part Number column
+        # Filter out rows with empty or 'N/A' values in Part Number column
         data = data[data['Part Number'].notna()]  # Remove rows with NaN values
         data = data[data['Part Number'] != 'N/A']  # Remove rows with 'N/A' values
         data = data[data['Part Number'].str.strip() != '']  # Remove rows with empty strings
@@ -101,5 +101,7 @@ class CardModel:
         data['Description'] = data['Part Number'].map(self.card_type_mapping).fillna('Unknown Card Type')
         # Keep only the necessary columns
         filtered_data = data[[ 'Part Number','Description']]
+        #Print the Return Values
         print(f"Returning now to Service Class the Processed data length: {len(filtered_data)}")
         return filtered_data.where(pd.notnull(filtered_data), None)
+
