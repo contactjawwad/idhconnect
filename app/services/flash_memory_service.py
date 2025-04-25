@@ -3,6 +3,7 @@ from ..models.flash_memory_model import FlashMemoryModel
 from ..models.chassis_model import ChassisModel
 import pandas as pd
 import gc
+import numpy as np
 class FlashMemoryService:
     def __init__(self):
         self.flash_memory_model = FlashMemoryModel()
@@ -87,6 +88,8 @@ class FlashMemoryService:
             return pd.DataFrame()
 
         merged_data = pd.merge(self.flash_data, self.chassis_data, on='Site Name', how='left')
+      # Clean NaN and ensure it's JSON-safe
+        merged_data.replace({np.nan: None}, inplace=True)
         #merged_data.drop(columns=['Site Name'], inplace=True)
         return merged_data[['Site Name','Slot', 'CF No', 'Capacity (GB)', 'CF Part Number', 'Shelf Type']]
     
