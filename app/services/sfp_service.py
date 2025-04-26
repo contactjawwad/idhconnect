@@ -39,7 +39,7 @@ class SFPService:
                     print(f"Data chunk is empty. Breaking loop for file {file_name}")
                     break
                 memory_usage = data_chunk.memory_usage(deep=True).sum()
-                print(f"Estimated memory usage for one chunk: {memory_usage / 1024**2} MB")
+                #print(f"Estimated memory usage for one chunk: {memory_usage / 1024**2} MB")
                 print(f"Read {len(data_chunk)} rows from {file_name}, starting at row {rows_to_skip}")
                 table_data.extend(data_chunk.to_dict('records'))
                 
