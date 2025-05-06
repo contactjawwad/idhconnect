@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 100);
         },
         onFirstDataRendered: function (params) {
-            params.api.autoSizeColumns(['Site Name', 'Connector Type', 'Part Number', 'Vendor Serial Number','Shelf Type']);
+            params.api.autoSizeColumns(['Site Name', 'Connector Type', 'Part Number', 'Vendor Serial Number','Description','Shelf Type']);
         }
     };
 
