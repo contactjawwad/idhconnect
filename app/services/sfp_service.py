@@ -1,5 +1,6 @@
 # /home/jawwad/InventoryDataHub/app/services/sfp_service.py
 from ..models.sfp_model import SFPModel
+from ..models.chassis_model import ChassisModel
 import pandas as pd
 from typing import List
 import logging
@@ -8,11 +9,33 @@ import gc
 class SFPService:
     def __init__(self):
         self.model = SFPModel()
+        self.chassis_model = ChassisModel() 
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(level=logging.INFO)  
     
     #def process_files(self,uploaded_files:List[str],temp_dir:str):
     def process_files(self, uploaded_files: List[str], temp_dir: str, start: int = 0, chunk_size: int = 10000):
+        
+        """
+        Reads SFP data in paginated chunks, enriches each row with Shelf Type from chassis data,
+        and builds summary counts per Part Number.
+        Returns: (table_data, summary_data, all_data_fetched)
+        """
+        # 1) Build a mapping of Site Name -> Shelf Type from all chassis files
+        shelf_map = {}
+        chassis_files = self.chassis_model.filter_files(uploaded_files)
+        for ch_file in chassis_files:
+            ch_path = f"{temp_dir}/{ch_file}"
+            total_ch_rows = self.chassis_model.get_total_rows(ch_path)
+            df_ch = self.chassis_model.read_filtered_data(
+                ch_path,
+                start=0,
+                chunk_size=total_ch_rows
+            )
+            # map each site to its shelf type
+            shelf_map.update(zip(df_ch['Site Name'], df_ch['Shelf Type']))
+
+        
         filtered_files = self.model.filter_files(uploaded_files)
         table_data = []
         summary_data = {}  # To accumulate summary data
@@ -48,7 +71,7 @@ class SFPService:
                 for row in data_chunk.to_dict('records'):
                     part_number = row.get("Part Number")
                     description = row.get("Description")
-                    if part_number in summary_data: #heck if the model number already exists as a key in the summary_data dictionary
+                    if part_number in summary_data: #Check if the model number already exists as a key in the summary_data dictionary
                         summary_data[part_number]['QTY'] += 1 ## Increment the count for this model number by 1
                     else:
                         summary_data[part_number] = {
