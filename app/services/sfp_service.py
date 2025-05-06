@@ -64,7 +64,10 @@ class SFPService:
                 memory_usage = data_chunk.memory_usage(deep=True).sum()
                 #print(f"Estimated memory usage for one chunk: {memory_usage / 1024**2} MB")
                 print(f"Read {len(data_chunk)} rows from {file_name}, starting at row {rows_to_skip}")
-                table_data.extend(data_chunk.to_dict('records'))
+                # Enrich with Shelf Type
+                data_chunk['Shelf Type'] = data_chunk['Site Name'].map(shelf_map)
+                     # Append to output list
+                table_data.extend(data_chunk.to_dict(orient='records'))
                 
                 
                 # Update summary data

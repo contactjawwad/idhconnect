@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
             { headerName: "Connector Type", field: "Connector Type", filter: true },
             { headerName: "Part Number", field: "Part Number", filter: true },
             { headerName: "Vendor Serial Number", field: "Vendor Serial Number", filter: true },
-            { headerName: "Description", field: "Description", filter: true }
+            { headerName: "Description", field: "Description", filter: true },
+            // ← Add this line:
+            { headerName: "Shelf Type",             field: "Shelf Type",             filter: true }
+
         ],
         defaultColDef: {
             flex: 1,
@@ -29,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 100);
         },
         onFirstDataRendered: function (params) {
-            params.api.autoSizeColumns(['Site Name', 'Connector Type', 'Part Number', 'Vendor Serial Number']);
+            params.api.autoSizeColumns(['Site Name', 'Connector Type', 'Part Number', 'Vendor Serial Number','Shelf Type']);
         }
     };
 
