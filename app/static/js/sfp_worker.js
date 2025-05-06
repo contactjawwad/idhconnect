@@ -6,7 +6,7 @@ self.onmessage = async function (e) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Main Report');
 
-    const headers = ["Site Name", "Connector Type", "Part Number", "Vendor Serial Number", "Description"];
+    const headers = ["Site Name", "Connector Type", "Part Number", "Vendor Serial Number", "Description","Shelf Type"];
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell, colNumber) => {
         cell.fill = {
@@ -25,8 +25,17 @@ self.onmessage = async function (e) {
     });
 
     mainGridData.forEach(data => {
-        const row = worksheet.addRow([data["Site Name"], data["Connector Type"], data["Part Number"], data["Vendor Serial Number"], data["Description"]]);
-        row.eachCell((cell, colNumber) => {
+        const row = worksheet.addRow([
+            data["Site Name"],
+            data["Connector Type"],
+            data["Part Number"],
+            data["Vendor Serial Number"],
+            data["Description"],
+            data["Shelf Type"]
+          ]);
+          
+
+                row.eachCell((cell, colNumber) => {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
