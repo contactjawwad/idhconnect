@@ -23,19 +23,7 @@ self.onmessage = function(e) {
   });
   XLSX.utils.book_append_sheet(wb, wsMain, 'Main Report');
 
-  // 3) Summary Report sheet
-  const summaryHeaders = ['Part Number','QTY','Description'];
-  const wsSummary = XLSX.utils.json_to_sheet(summaryGridData, {
-    header: summaryHeaders,
-    skipHeader: false
-  });
-  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary Report');
-
-  // 4) Write out the XLSX as an ArrayBuffer (transferable)
-  const wbout = XLSX.write(wb, {
-    bookType: 'xlsx',
-    type: 'array'
-  });
+  
 
   // 5) Send it back to the main thread
   self.postMessage(wbout, [wbout]);
