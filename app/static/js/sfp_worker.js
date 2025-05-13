@@ -6,7 +6,7 @@ self.onmessage = async function (e) {
 
   // --- Main Report sheet ---
   const mainSheet   = workbook.addWorksheet('Main Report');
-  const mainHeaders = ['Site Name','Connector Type','Part Number','Vendor Serial Number','Description','Shelf Type'];
+  const mainHeaders = ['Site Name','Connector Type','Part Number','Vendor Serial Number','Description'];
   const mainHeaderRow = mainSheet.addRow(mainHeaders);
   // Style header row only
   mainHeaderRow.eachCell(cell => {
@@ -18,7 +18,7 @@ self.onmessage = async function (e) {
   // Bulk add data rows
   const mainRows = mainGridData.map(d => [
     d['Site Name'], d['Connector Type'], d['Part Number'],
-    d['Vendor Serial Number'], d['Description'], d['Shelf Type']
+    d['Vendor Serial Number'], d['Description'], 
   ]);
   mainSheet.addRows(mainRows);
   // Compute column widths from header + data
