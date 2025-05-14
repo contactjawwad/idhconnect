@@ -8,7 +8,9 @@ import tempfile
 import pandas as pd
 from io import BytesIO
 from openpyxl import Workbook
-
+# WriteOnlyCell lives here in current versions of openpyxl
+from openpyxl.cell.write_only import WriteOnlyCell  
+from openpyxl.styles import PatternFill, Alignment, Border, Side, Font
 
 
 sfp_blueprint=Blueprint('sfp',__name__)
@@ -66,45 +68,83 @@ class SFPController(BaseController):
             uploaded_files = session.get('temp_files', [])
             temp_dir = current_app.config['temp_dir']
 
-            # 1) Fetch all data
+            # Fetch all data
             table_data, summary_data, _ = self.service.process_files(
-                uploaded_files, temp_dir, start=0, chunk_size=10**9
+                uploaded_files,
+                temp_dir,
+                start=0,
+                chunk_size=10**9
             )
             current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
 
-            # 2) Create a write-only workbook
+            # Create write-only workbook
             wb = Workbook(write_only=True)
 
-            # --- Main Report sheet ---
-            ws_main = wb.create_sheet('Main Report')
-            ws_main.append([
-                'Site Name','Connector Type','Part Number',
-                'Vendor Serial Number','Description','Shelf Type'
-            ])
-            for row in table_data:
-                ws_main.append([
-                    row.get('Site Name'),
-                    row.get('Connector Type'),
-                    row.get('Part Number'),
-                    row.get('Vendor Serial Number'),
-                    row.get('Description'),
-                    row.get('Shelf Type', '')
-                ])
+            # Styles
+            header_fill = PatternFill(fill_type='solid', fgColor='FF000080')
+            data_fill   = PatternFill(fill_type='solid', fgColor='FFDCE6F1')
+            header_font = Font(bold=True, color='FFFFFFFF')
+            thin_border = Border(
+                left=Side(style='thin'), right=Side(style='thin'),
+                top=Side(style='thin'), bottom=Side(style='thin')
+            )
+            align_center = Alignment(horizontal='center', vertical='center')
 
-            # --- Summary Report sheet ---
+            # --- Main Report ---
+            ws_main = wb.create_sheet('Main Report')
+            main_headers = ['Site Name','Connector Type','Part Number','Vendor Serial Number','Description','Shelf Type']
+            # Header row
+            header_row = []
+            for h in main_headers:
+                cell = WriteOnlyCell(ws_main, value=h)
+                cell.fill      = header_fill
+                cell.font      = header_font
+                cell.border    = thin_border
+                cell.alignment = align_center
+                header_row.append(cell)
+            ws_main.append(header_row)
+            # Data rows
+            for r in table_data:
+                row = []
+                for col in main_headers:
+                    cell = WriteOnlyCell(ws_main, value=r.get(col, ''))
+                    cell.fill      = data_fill
+                    cell.border    = thin_border
+                    cell.alignment = align_center
+                    row.append(cell)
+                ws_main.append(row)
+
+            # --- Summary Report ---
             ws_sum = wb.create_sheet('Summary Report')
-            ws_sum.append(['Part Number','QTY','Description'])
+            sum_headers = ['Part Number','QTY','Description']
+            header_row2 = []
+            for h in sum_headers:
+                cell = WriteOnlyCell(ws_sum, value=h)
+                cell.fill      = header_fill
+                cell.font      = header_font
+                cell.border    = thin_border
+                cell.alignment = align_center
+                header_row2.append(cell)
+            ws_sum.append(header_row2)
             for pn, info in summary_data.items():
-                ws_sum.append([pn, info['QTY'], info['Description']])
+                row = []
+                vals = [pn, info['QTY'], info['Description']]
+                for v in vals:
+                    cell = WriteOnlyCell(ws_sum, value=v)
+                    cell.fill      = data_fill
+                    cell.border    = thin_border
+                    cell.alignment = align_center
+                    row.append(cell)
+                ws_sum.append(row)
 
             current_app.logger.info('ABOUT TO STREAM EXCEL')
-        # 3) Save workbook into a BytesIO
+            # Stream to BytesIO
             output = BytesIO()
             wb.save(output)
             output.seek(0)
             current_app.logger.info('EXCEL READY, SENDING')
 
-            # 4) Stream back to client
+            # Send file response
             return send_file(
                 output,
                 as_attachment=True,
