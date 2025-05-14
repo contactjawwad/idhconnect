@@ -62,26 +62,27 @@ class SFPController(BaseController):
         try:
             uploaded_files = session.get('temp_files', [])
             temp_dir = current_app.config['temp_dir']
-
+            print(f"....EXPORT START....")
             # Fetch all data at once
+            print(f"DONE PROCESSING {len(table_data)} rows")
             table_data, summary_data, _ = self.service.process_files(
                 uploaded_files, temp_dir, start=0, chunk_size=10**9
             )
-
+              
             # Build DataFrames
             df_main = pd.DataFrame(table_data)
             df_summary = pd.DataFrame([
                 {'Part Number': pn, 'QTY': info['QTY'], 'Description': info['Description']}
                 for pn, info in summary_data.items()
             ])
-
+            print("ABOUT TO WRITE EXCEL")
             # Write to Excel in memory
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df_main.to_excel(writer, sheet_name='Main Report', index=False)
                 df_summary.to_excel(writer, sheet_name='Summary Report', index=False)
             output.seek(0)
-
+            print("EXCEL READY, SENDING")
             # Send file
             return send_file(
                 output,
