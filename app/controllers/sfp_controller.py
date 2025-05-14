@@ -14,9 +14,9 @@ from openpyxl import Workbook
 
 # Try both possible locations of WriteOnlyCell
 try:
-    from openpyxl.writer.write_only import WriteOnlyCell
+    from openpyxl.worksheet.write_only import WriteOnlyCell
 except ImportError:
-    from openpyxl.cell.write_only import WriteOnlyCell
+    from openpyxl.writer.write_only import WriteOnlyCell
 
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
