@@ -77,12 +77,16 @@ class SFPController(BaseController):
 
             # Write to Excel using XlsxWriter (constant_memory for streaming)
             output = BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter', options={'constant_memory': True}) as writer:
+            with pd.ExcelWriter(
+                output,
+                engine='xlsxwriter',
+                engine_kwargs={'options': {'constant_memory': True}}
+            ) as writer:
                 # Main sheet
                 df_main.to_excel(writer, sheet_name='Main Report', index=False, header=False, startrow=1)
                 workbook  = writer.book
                 worksheet = writer.sheets['Main Report']
-                # Header formatting
+                            # Header formatting
                 header_format = workbook.add_format({
                     'bold': True,
                     'bg_color': '#000080',
