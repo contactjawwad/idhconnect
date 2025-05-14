@@ -89,7 +89,7 @@ class SFPController(BaseController):
             return send_file(
                 output,
                 as_attachment=True,
-                attachment_filename='SFP_Model_Report.xlsx',
+                download_name='SFP_Model_Report.xlsx',
                 mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
 
