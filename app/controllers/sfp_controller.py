@@ -39,6 +39,7 @@ def sfp_export_route():
     controller = SFPController()
     return controller.export_sfp_report()
 
+
 class SFPController(BaseController):
 
     def __init__(self):
@@ -59,58 +60,58 @@ class SFPController(BaseController):
         
         return jsonify({'data': table_data, 'summary_data': summary_data, 'all_data_fetched': all_data_fetched})
         
-def export_sfp_report(self):
-    try:
-        current_app.logger.info('EXPORT START')
-        uploaded_files = session.get('temp_files', [])
-        temp_dir = current_app.config['temp_dir']
+    def export_sfp_report(self):
+        try:
+            current_app.logger.info('EXPORT START')
+            uploaded_files = session.get('temp_files', [])
+            temp_dir = current_app.config['temp_dir']
 
-        # 1) Fetch all data
-        table_data, summary_data, _ = self.service.process_files(
-            uploaded_files, temp_dir, start=0, chunk_size=10**9
-        )
-        current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
+            # 1) Fetch all data
+            table_data, summary_data, _ = self.service.process_files(
+                uploaded_files, temp_dir, start=0, chunk_size=10**9
+            )
+            current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
 
-        # 2) Create a write-only workbook
-        wb = Workbook(write_only=True)
+            # 2) Create a write-only workbook
+            wb = Workbook(write_only=True)
 
-        # --- Main Report sheet ---
-        ws_main = wb.create_sheet('Main Report')
-        ws_main.append([
-            'Site Name','Connector Type','Part Number',
-            'Vendor Serial Number','Description','Shelf Type'
-        ])
-        for row in table_data:
+            # --- Main Report sheet ---
+            ws_main = wb.create_sheet('Main Report')
             ws_main.append([
-                row.get('Site Name'),
-                row.get('Connector Type'),
-                row.get('Part Number'),
-                row.get('Vendor Serial Number'),
-                row.get('Description'),
-                row.get('Shelf Type', '')
+                'Site Name','Connector Type','Part Number',
+                'Vendor Serial Number','Description','Shelf Type'
             ])
+            for row in table_data:
+                ws_main.append([
+                    row.get('Site Name'),
+                    row.get('Connector Type'),
+                    row.get('Part Number'),
+                    row.get('Vendor Serial Number'),
+                    row.get('Description'),
+                    row.get('Shelf Type', '')
+                ])
 
-        # --- Summary Report sheet ---
-        ws_sum = wb.create_sheet('Summary Report')
-        ws_sum.append(['Part Number','QTY','Description'])
-        for pn, info in summary_data.items():
-            ws_sum.append([pn, info['QTY'], info['Description']])
+            # --- Summary Report sheet ---
+            ws_sum = wb.create_sheet('Summary Report')
+            ws_sum.append(['Part Number','QTY','Description'])
+            for pn, info in summary_data.items():
+                ws_sum.append([pn, info['QTY'], info['Description']])
 
-        current_app.logger.info('ABOUT TO STREAM EXCEL')
-    # 3) Save workbook into a BytesIO
-        output = BytesIO()
-        wb.save(output)
-        output.seek(0)
-        current_app.logger.info('EXCEL READY, SENDING')
+            current_app.logger.info('ABOUT TO STREAM EXCEL')
+        # 3) Save workbook into a BytesIO
+            output = BytesIO()
+            wb.save(output)
+            output.seek(0)
+            current_app.logger.info('EXCEL READY, SENDING')
 
-        # 4) Stream back to client
-        return send_file(
-            output,
-            as_attachment=True,
-            download_name='SFP_Model_Report.xlsx',
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+            # 4) Stream back to client
+            return send_file(
+                output,
+                as_attachment=True,
+                download_name='SFP_Model_Report.xlsx',
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
 
-    except Exception:
-        current_app.logger.exception('Failed to export SFP report')
-        return jsonify({'error': 'Export failed on server'}), 500
+        except Exception:
+            current_app.logger.exception('Failed to export SFP report')
+            return jsonify({'error': 'Export failed on server'}), 500
