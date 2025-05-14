@@ -7,6 +7,7 @@ import re
 import tempfile
 import pandas as pd
 from io import BytesIO
+from openpyxl import Workbook
 
 
 sfp_blueprint=Blueprint('sfp',__name__)
@@ -64,69 +65,52 @@ class SFPController(BaseController):
             uploaded_files = session.get('temp_files', [])
             temp_dir = current_app.config['temp_dir']
 
-            # Fetch all data
+            # 1) Fetch all data
             table_data, summary_data, _ = self.service.process_files(
                 uploaded_files, temp_dir, start=0, chunk_size=10**9
             )
             current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
 
-            # Convert to DataFrames
-            df_main = pd.DataFrame(table_data)
-            df_summary = pd.DataFrame([{'Part Number': pn, 'QTY': info['QTY'], 'Description': info['Description']}
-                                    for pn, info in summary_data.items()])
+            # 2) Create a write-only workbook
+            wb = Workbook(write_only=True)
 
-            # Write to Excel using XlsxWriter (constant_memory for streaming)
+            # --- Main Report sheet ---
+            ws_main = wb.create_sheet('Main Report')
+            ws_main.append([
+                'Site Name','Connector Type','Part Number',
+                'Vendor Serial Number','Description','Shelf Type'
+            ])
+            for row in table_data:
+                ws_main.append([
+                    row.get('Site Name'),
+                    row.get('Connector Type'),
+                    row.get('Part Number'),
+                    row.get('Vendor Serial Number'),
+                    row.get('Description'),
+                    row.get('Shelf Type', '')
+                ])
+
+            # --- Summary Report sheet ---
+            ws_sum = wb.create_sheet('Summary Report')
+            ws_sum.append(['Part Number','QTY','Description'])
+            for pn, info in summary_data.items():
+                ws_sum.append([pn, info['QTY'], info['Description']])
+
+            current_app.logger.info('ABOUT TO STREAM EXCEL')
+            # 3) Save workbook into a BytesIO
             output = BytesIO()
-            with pd.ExcelWriter(
-                output,
-                engine='xlsxwriter',
-                engine_kwargs={'options': {'constant_memory': True}}
-            ) as writer:
-                # Main sheet
-                df_main.to_excel(writer, sheet_name='Main Report', index=False, header=False, startrow=1)
-                workbook  = writer.book
-                worksheet = writer.sheets['Main Report']
-                            # Header formatting
-                header_format = workbook.add_format({
-                    'bold': True,
-                    'bg_color': '#000080',
-                    'font_color': '#FFFFFF',
-                    'align': 'center',
-                    'border': 1
-                })
-                # Write header row manually
-                main_headers = ['Site Name','Connector Type','Part Number','Vendor Serial Number','Description','Shelf Type']
-                for col_num, header in enumerate(main_headers):
-                    worksheet.write(0, col_num, header, header_format)
-                # Auto column widths
-                for i, width in enumerate([20,18,15,22,30,18]):
-                    worksheet.set_column(i, i, width)
-
-                # Summary sheet
-                df_summary.to_excel(writer, sheet_name='Summary Report', index=False, header=False, startrow=1)
-                worksheet2 = writer.sheets['Summary Report']
-                summary_format = workbook.add_format({
-                    'bold': True,
-                    'bg_color': '#000080',
-                    'font_color': '#FFFFFF',
-                    'align': 'center',
-                    'border': 1
-                })
-                summary_headers = ['Part Number','QTY','Description']
-                for col_num, header in enumerate(summary_headers):
-                    worksheet2.write(0, col_num, header, summary_format)
-                for i, width in enumerate([15,8,30]):
-                    worksheet2.set_column(i, i, width)
-
+            wb.save(output)
             output.seek(0)
             current_app.logger.info('EXCEL READY, SENDING')
 
+            # 4) Return as response
             return send_file(
                 output,
                 as_attachment=True,
                 download_name='SFP_Model_Report.xlsx',
                 mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
+
         except Exception:
             current_app.logger.exception('Failed to export SFP report')
             return jsonify({'error': 'Export failed on server'}), 500
