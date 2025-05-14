@@ -59,6 +59,43 @@ class SFPController(BaseController):
         
     def export_sfp_report(self):
         # Exports full report as XLSX
+        try:
+            uploaded_files = session.get('temp_files', [])
+            temp_dir = current_app.config['temp_dir']
+
+            # Fetch all data at once
+            table_data, summary_data, _ = self.service.process_files(
+                uploaded_files, temp_dir, start=0, chunk_size=10**9
+            )
+
+            # Build DataFrames
+            df_main = pd.DataFrame(table_data)
+            df_summary = pd.DataFrame([
+                {'Part Number': pn, 'QTY': info['QTY'], 'Description': info['Description']}
+                for pn, info in summary_data.items()
+            ])
+
+            # Write to Excel in memory
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df_main.to_excel(writer, sheet_name='Main Report', index=False)
+                df_summary.to_excel(writer, sheet_name='Summary Report', index=False)
+            output.seek(0)
+
+            # Send file
+            return send_file(
+                output,
+                as_attachment=True,
+                attachment_filename='SFP_Model_Report.xlsx',
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+
+        except Exception as e:
+            # Log full stack trace
+            current_app.logger.exception('Failed to export SFP report')
+            # Optionally return JSON error instead of file
+            return jsonify({'error': str(e)}), 500
+        # Exports full report as XLSX
         uploaded_files = session.get('temp_files', [])
         temp_dir = current_app.config['temp_dir']
         # Fetch all data at once
@@ -84,5 +121,3 @@ class SFPController(BaseController):
             download_name='SFP_Model_Report.xlsx',
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-    
-    

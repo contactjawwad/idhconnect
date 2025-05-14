@@ -8,15 +8,7 @@ services:
       args:
         - CACHEBUST=1  # Use this to bust cache intentionally when needed
        # Expose the port internally so Nginx can reach it:
-    expose:
-      - "8000"
-    # Override the container startup to launch Gunicorn with your factory and a long timeout
-    command: >
-      gunicorn
-      --bind 0.0.0.0:8000
-      --workers 4
-      --timeout 800
-      "app:create_app()"
+    command: gunicorn --workers 4 --timeout 600 "app:create_app()"
     volumes:
       - idh_logs:/var/log/IDHLogs
     networks:
