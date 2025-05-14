@@ -7,17 +7,9 @@ import re
 import tempfile
 import pandas as pd
 from io import BytesIO
+
 from openpyxl import Workbook
-# WriteOnlyCell lives here in current versions of openpyxl
-#from openpyxl.writer.write_only import WriteOnlyCell
-#from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-
-# Try both possible locations of WriteOnlyCell
-try:
-    from openpyxl.worksheet.write_only import WriteOnlyCell
-except ImportError:
-    from openpyxl.writer.write_only import WriteOnlyCell
-
+from openpyxl.writer.write_only import WriteOnlyCell
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 sfp_blueprint=Blueprint('sfp',__name__)
