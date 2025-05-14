@@ -1,12 +1,14 @@
 #jawwad@jumphost:~/InventoryDataHub/app/controllers/sfp_controller.py
 
-from flask import Blueprint,session,render_template,current_app,request,jsonify,send_file
+from flask import Blueprint,session,render_template,current_app,request,jsonify,send_file,Response
 from .main_controller import BaseController
 from ..services.sfp_service import SFPService  
 import re
 import tempfile
 import pandas as pd
 from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.writer.excel import save_virtual_workbook
 
 
 sfp_blueprint=Blueprint('sfp',__name__)
@@ -57,73 +59,58 @@ class SFPController(BaseController):
         
         return jsonify({'data': table_data, 'summary_data': summary_data, 'all_data_fetched': all_data_fetched})
         
-    def export_sfp_report(self):
-        # Exports full report as XLSX
-        try:
-            current_app.logger.info('EXPORT START')
-            uploaded_files = session.get('temp_files', [])
-            temp_dir = current_app.config['temp_dir']
-            
-            # Fetch all data at once
-
-            
-            table_data, summary_data, _ = self.service.process_files(
-                uploaded_files, temp_dir, start=0, chunk_size=10**9
-            )
-            current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
-
-            # Build DataFrames
-            df_main = pd.DataFrame(table_data)
-            df_summary = pd.DataFrame([
-                {'Part Number': pn, 'QTY': info['QTY'], 'Description': info['Description']}
-                for pn, info in summary_data.items()
-            ])
-            print("ABOUT TO WRITE EXCEL")
-            current_app.logger.info('ABOUT TO WRITE EXCEL')
-
-            # Write to Excel in memory
-            output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df_main.to_excel(writer, sheet_name='Main Report', index=False)
-                df_summary.to_excel(writer, sheet_name='Summary Report', index=False)
-            output.seek(0)
-            current_app.logger.info('EXCEL READY, SENDING')
-            # Send file
-            return send_file(
-                output,
-                as_attachment=True,
-                download_name='SFP_Model_Report.xlsx',
-                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            )
-
-        except Exception as e:
-            # Log full stack trace
-            current_app.logger.exception('Failed to export SFP report')
-            # Optionally return JSON error instead of file
-            return jsonify({'error': str(e)}), 500
-        # Exports full report as XLSX
+def export_sfp_report(self):
+    try:
+        current_app.logger.info('EXPORT START')
         uploaded_files = session.get('temp_files', [])
         temp_dir = current_app.config['temp_dir']
-        # Fetch all data at once
+
+        # 1) Fetch all data
         table_data, summary_data, _ = self.service.process_files(
             uploaded_files, temp_dir, start=0, chunk_size=10**9
         )
-        # Build DataFrames
-        df_main = pd.DataFrame(table_data)
-        df_summary = pd.DataFrame([
-            {'Part Number': pn, 'QTY': info['QTY'], 'Description': info['Description']}
-            for pn, info in summary_data.items()
+        current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
+
+        # 2) Create a write-only workbook
+        wb = Workbook(write_only=True)
+
+        # --- Main Report sheet ---
+        ws_main = wb.create_sheet('Main Report')
+        ws_main.append([
+            'Site Name','Connector Type','Part Number',
+            'Vendor Serial Number','Description','Shelf Type'
         ])
-        # Write to Excel in memory
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df_main.to_excel(writer, sheet_name='Main Report', index=False)
-            df_summary.to_excel(writer, sheet_name='Summary Report', index=False)
-        output.seek(0)
-        # Send file
-        return send_file(
-            output,
-            as_attachment=True,
-            download_name='SFP_Model_Report.xlsx',
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        for row in table_data:
+            ws_main.append([
+                row.get('Site Name'),
+                row.get('Connector Type'),
+                row.get('Part Number'),
+                row.get('Vendor Serial Number'),
+                row.get('Description'),
+                row.get('Shelf Type', '')
+            ])
+
+        # --- Summary Report sheet ---
+        ws_sum = wb.create_sheet('Summary Report')
+        ws_sum.append(['Part Number','QTY','Description'])
+        for pn, info in summary_data.items():
+            ws_sum.append([pn, info['QTY'], info['Description']])
+
+        current_app.logger.info('ABOUT TO STREAM EXCEL')
+
+        # 3) Stream out as an in-memory bytes object
+        data = save_virtual_workbook(wb)
+        current_app.logger.info('EXCEL READY, SENDING')
+
+        # 4) Return as response
+        return Response(
+            data,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={
+                'Content-Disposition': 'attachment; filename="SFP_Model_Report.xlsx"'
+            }
         )
+
+    except Exception:
+        current_app.logger.exception('Failed to export SFP report')
+        return jsonify({'error': 'Export failed on server'}), 500
