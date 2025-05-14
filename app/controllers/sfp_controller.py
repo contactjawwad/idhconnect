@@ -60,15 +60,17 @@ class SFPController(BaseController):
     def export_sfp_report(self):
         # Exports full report as XLSX
         try:
+            print(f"....EXPORT START....")
             uploaded_files = session.get('temp_files', [])
             temp_dir = current_app.config['temp_dir']
-            print(f"....EXPORT START....")
+            
             # Fetch all data at once
-            print(f"DONE PROCESSING {len(table_data)} rows")
+
+            
             table_data, summary_data, _ = self.service.process_files(
                 uploaded_files, temp_dir, start=0, chunk_size=10**9
             )
-              
+            print(f'DONE PROCESSING {len(table_data)} rows')              
             # Build DataFrames
             df_main = pd.DataFrame(table_data)
             df_summary = pd.DataFrame([
