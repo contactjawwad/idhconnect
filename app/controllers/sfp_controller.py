@@ -8,7 +8,7 @@ import tempfile
 import pandas as pd
 from io import BytesIO
 from openpyxl import Workbook
-from openpyxl.writer.excel import save_virtual_workbook
+
 
 
 sfp_blueprint=Blueprint('sfp',__name__)
@@ -97,18 +97,18 @@ def export_sfp_report(self):
             ws_sum.append([pn, info['QTY'], info['Description']])
 
         current_app.logger.info('ABOUT TO STREAM EXCEL')
-
-        # 3) Stream out as an in-memory bytes object
-        data = save_virtual_workbook(wb)
+    # 3) Save workbook into a BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
         current_app.logger.info('EXCEL READY, SENDING')
 
-        # 4) Return as response
-        return Response(
-            data,
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            headers={
-                'Content-Disposition': 'attachment; filename="SFP_Model_Report.xlsx"'
-            }
+        # 4) Stream back to client
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name='SFP_Model_Report.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
 
     except Exception:
