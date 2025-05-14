@@ -18,6 +18,7 @@ COPY requirements.txt ./
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 RUN pip install --upgrade "openpyxl>=3.0.10,<3.1"
+RUN pip install --upgrade "xlsxwriter>=3.0.0"
 
 
 # Copy the rest of the application code into the container
