@@ -9,9 +9,16 @@ import pandas as pd
 from io import BytesIO
 from openpyxl import Workbook
 # WriteOnlyCell lives here in current versions of openpyxl
-from openpyxl.writer.write_only import WriteOnlyCell
-from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+#from openpyxl.writer.write_only import WriteOnlyCell
+#from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
+# Try both possible locations of WriteOnlyCell
+try:
+    from openpyxl.writer.write_only import WriteOnlyCell
+except ImportError:
+    from openpyxl.cell.write_only import WriteOnlyCell
+
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 sfp_blueprint=Blueprint('sfp',__name__)
 #This sfp used in argument is used in HTML sfp.
@@ -64,6 +71,7 @@ class SFPController(BaseController):
         
     def export_sfp_report(self):
         try:
+            
             current_app.logger.info('EXPORT START')
             uploaded_files = session.get('temp_files', [])
             temp_dir = current_app.config['temp_dir']
