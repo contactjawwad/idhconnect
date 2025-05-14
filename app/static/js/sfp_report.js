@@ -151,7 +151,8 @@ document.addEventListener('DOMContentLoaded', function () {
         exportButton.disabled = true;
 
         // 2) Fetch the XLSX from the server
-        fetch('/sfp/export')
+        
+        fetch('/reports/sfp/export')
             .then(response => {
             if (!response.ok) {
                 throw new Error(`Server error (${response.status})`);
