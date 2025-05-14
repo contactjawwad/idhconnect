@@ -9,7 +9,14 @@ import pandas as pd
 from io import BytesIO
 
 from openpyxl import Workbook
-from openpyxl.writer.write_only import WriteOnlyCell
+
+# Try importing WriteOnlyCell for header styling; if unavailable, skip styling
+try:
+    from openpyxl.writer.write_only import WriteOnlyCell
+    can_style_write_only = True
+except ImportError:
+    can_style_write_only = False
+
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 sfp_blueprint=Blueprint('sfp',__name__)
