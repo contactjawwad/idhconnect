@@ -60,7 +60,7 @@ class SFPController(BaseController):
     def export_sfp_report(self):
         # Exports full report as XLSX
         try:
-            print(f"....EXPORT START....")
+            current_app.logger.info('EXPORT START')
             uploaded_files = session.get('temp_files', [])
             temp_dir = current_app.config['temp_dir']
             
@@ -70,7 +70,8 @@ class SFPController(BaseController):
             table_data, summary_data, _ = self.service.process_files(
                 uploaded_files, temp_dir, start=0, chunk_size=10**9
             )
-            print(f'DONE PROCESSING {len(table_data)} rows')              
+            current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
+
             # Build DataFrames
             df_main = pd.DataFrame(table_data)
             df_summary = pd.DataFrame([
@@ -78,13 +79,15 @@ class SFPController(BaseController):
                 for pn, info in summary_data.items()
             ])
             print("ABOUT TO WRITE EXCEL")
+            current_app.logger.info('ABOUT TO WRITE EXCEL')
+
             # Write to Excel in memory
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df_main.to_excel(writer, sheet_name='Main Report', index=False)
                 df_summary.to_excel(writer, sheet_name='Summary Report', index=False)
             output.seek(0)
-            print("EXCEL READY, SENDING")
+            current_app.logger.info('EXCEL READY, SENDING')
             # Send file
             return send_file(
                 output,
