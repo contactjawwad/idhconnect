@@ -146,45 +146,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     window.exportFullReport = function () {
+    // 1) Notify and disable
         displayNotification('Exporting data, please wait...', false);
-        exportButton.disabled = true;  // Disable the export button
-        const mainGridData = [];
-        mainGridApi.forEachNodeAfterFilterAndSort((rowNode) => {
-            mainGridData.push(rowNode.data);
-        });
+        exportButton.disabled = true;
 
-        const summaryGridData = [];
-        summaryGridApi.forEachNodeAfterFilterAndSort((rowNode) => {
-            summaryGridData.push(rowNode.data);
-        });
-
-        const worker = new Worker('/static/js/sfp_worker.js');
-        worker.postMessage({ mainGridData, summaryGridData });
-
-        worker.onmessage = function (e) {
-            const buffer = e.data;
-            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        // 2) Fetch the XLSX from the server
+        fetch('/sfp/export')
+            .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server error (${response.status})`);
+            }
+            return response.blob();
+            })
+            .then(blob => {
+            // 3) Trigger download
             const url = URL.createObjectURL(blob);
-            const anchor = document.createElement('a');
-            anchor.href = url;
-            anchor.download = 'SFP_Model_Report.xlsx';
-            anchor.click();
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SFP_Model_Report.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            displayNotification('Successfully loaded and ready to save!', true);
-            exportButton.disabled = false;  // Enable the export button
-            setTimeout(hideNotification, 5000); // Hide notification after 5 seconds
 
-            // No need to clear grid data here, just clean up variables
-            mainGridData.length = 0;
-            summaryGridData.length = 0;
-        };
-
-        worker.onerror = function (error) {
+            // 4) Success notification
+            displayNotification('Export successful! Your download should start shortly.', true);
+            })
+            .catch(error => {
+            console.error('Export failed:', error);
             displayNotification(`Export error: ${error.message}`, false);
-            console.error("Worker error:", error);
-            exportButton.disabled = false;  // Enable the export button on error
-        };
+            })
+            .finally(() => {
+            // 5) Re-enable the button after a short delay
+            setTimeout(() => {
+                exportButton.disabled = false;
+                hideNotification();
+            }, 3000);
+            });
     };
+
 
     // Clear data on page refresh or navigation
     window.addEventListener('beforeunload', function () {

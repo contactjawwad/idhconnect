@@ -1,10 +1,13 @@
 #jawwad@jumphost:~/InventoryDataHub/app/controllers/sfp_controller.py
 
-from flask import Blueprint,session,render_template,current_app,request,jsonify
+from flask import Blueprint,session,render_template,current_app,request,jsonify,send_file
 from .main_controller import BaseController
 from ..services.sfp_service import SFPService  
 import re
 import tempfile
+import pandas as pd
+from io import BytesIO
+
 
 sfp_blueprint=Blueprint('sfp',__name__)
 #This sfp used in argument is used in HTML sfp.
@@ -29,6 +32,10 @@ def sfp_report_data():
     print(f"Controller Requesting chunk: start={start}, length={chunk_size}")
     return controller.sfp_report_data(uploaded_files, temp_dir, start, chunk_size)
 
+@sfp_blueprint.route('/sfp/export', methods=['GET'])
+def sfp_export_route():
+    controller = SFPController()
+    return controller.export_sfp_report()
 
 class SFPController(BaseController):
 
@@ -50,5 +57,32 @@ class SFPController(BaseController):
         
         return jsonify({'data': table_data, 'summary_data': summary_data, 'all_data_fetched': all_data_fetched})
         
-        
-        
+    def export_sfp_report(self):
+        # Exports full report as XLSX
+        uploaded_files = session.get('temp_files', [])
+        temp_dir = current_app.config['temp_dir']
+        # Fetch all data at once
+        table_data, summary_data, _ = self.service.process_files(
+            uploaded_files, temp_dir, start=0, chunk_size=10**9
+        )
+        # Build DataFrames
+        df_main = pd.DataFrame(table_data)
+        df_summary = pd.DataFrame([
+            {'Part Number': pn, 'QTY': info['QTY'], 'Description': info['Description']}
+            for pn, info in summary_data.items()
+        ])
+        # Write to Excel in memory
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df_main.to_excel(writer, sheet_name='Main Report', index=False)
+            df_summary.to_excel(writer, sheet_name='Summary Report', index=False)
+        output.seek(0)
+        # Send file
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name='SFP_Model_Report.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    
+    
