@@ -1,93 +1,173 @@
-# idh-dockerized
 
+# 🧠 IDHConnect – Inventory Data Hub
 
+**A Dockerized Flask + NGINX Web App for Validating and Reporting Excel-Based Inventory Data From NSP**
 
-## Getting started
+IDHConnect (Inventory Data Hub) is a modular inventory management platform built with Flask and served through NGINX. Designed primarily for telecom hardware inventory files extracted from Nokia NSP, it enables users to upload Excel files, validate them, and generate structured report sheets for operational review and exports.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+The app is built using Flask’s MVC pattern, supports future multi-tenancy and authentication, and is fully containerized using Docker Compose with an automated CI/CD pipeline via GitLab.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## 🚀 Key Features
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- ✅ Upload large Excel-based inventory files
+- 🧠 Intelligent validation for various hardware fields (e.g., SFPs, Flash, Power Modules)
+- 📊 Auto-generation of Excel reports with both `Main` and `Summary` tabs
+- 🔄 Real-time interactivity with AJAX
+- 🔒 Secure and scalable (multi-user support in roadmap)
+- 🐳 Dual container deployment: Flask backend + NGINX frontend
+- 🔁 CI/CD integrated: Docker Hub builds and live deployment
+
+---
+
+## 🧱 Architecture Overview
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/mydockergroup1/idh-dockerized.git
-git branch -M main
-git push -uf origin main
+User ↔ NGINX (Port 80)
+             ↓
+       IDH Flask App (Gunicorn, Port 8000)
 ```
 
-## Integrate with your tools
+- `nginx_container`: reverse proxy for routing, timeout tuning, static file serving
+- `idh_container`: Flask backend (4 Gunicorn workers) exposing port 8000 internally
+- Docker Compose handles both containers via bridge network (`myappnetwork`)
+- All logs and assets use persistent volumes: `idh_logs` and `nginx_logs`
 
-- [ ] [Set up project integrations](https://gitlab.com/mydockergroup1/idh-dockerized/-/settings/integrations)
+---
 
-## Collaborate with your team
+## 🗂️ Directory Structure
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```
+InventoryDataHub/
+├── app/                    # Flask MVC app
+│   ├── controllers/        # View logic (routes)
+│   ├── models/             # Data parsing logic
+│   ├── services/           # Report logic
+│   ├── static/             # JS, CSS, images
+│   ├── templates/          # HTML reports
+│   └── utils/              # Logging, cleanup
+├── deploy/
+│   ├── docker-compose.yml  # Compose deployment
+│   ├── idh-docker/         # Dockerfile for backend
+│   ├── nginx-docker/       # Dockerfile + NGINX config
+├── tests/                  # Pytest files
+├── requirements.txt
+├── run.sh
+```
 
-## Test and Deploy
+---
 
-Use the built-in continuous integration in GitLab.
+## 🐳 How to Deploy with Docker Compose
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+> 🔥 Requires: Docker + Docker Compose (v2 or above)
 
-***
+### Step 1: Clone the Repository
 
-# Editing this README
+```bash
+git clone https://github.com/YOUR_USERNAME/idhconnect
+cd idhconnect/deploy
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Step 2: Run the App
 
-## Suggestions for a good README
+```bash
+docker-compose up -d
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+Then go to: [http://localhost](http://localhost)
 
-## Name
-Choose a self-explaining name for your project.
+---
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## 🧪 Run Backend Tests
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+docker-compose run --rm idh_container /bin/sh -c "export PYTHONPATH=/usr/src/app:\$PYTHONPATH && pytest tests/"
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## 📦 Docker Images Used
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+| Image | Purpose | Tagged On |
+|-------|---------|-----------|
+| `contactjawwad/idh-app:idh-latest` | Flask Backend (Gunicorn) | Docker Hub |
+| `contactjawwad/idh-app:nginx-latest` | NGINX Reverse Proxy | Docker Hub |
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+> These are **auto-built and pushed by GitLab CI/CD** during deployment.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+---
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## 📋 NGINX Configuration Highlights
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+- Routes all frontend requests to backend Flask app:
+  ```nginx
+  proxy_pass http://idh_container:8000;
+  ```
+- Client body limit: `1000M`
+- Timeout tuning: `900s` for uploads and processing
+- Also serves static test page at: [http://localhost/test](http://localhost/test)
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+---
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## 💡 Build Notes
 
-## License
-For open source projects, say how it is licensed.
+### Local Builds (Compose)
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Docker Compose builds both images from these locations:
+- `deploy/idh-docker/Dockerfile` → `idh_container`
+- `deploy/nginx-docker/Dockerfile` → `nginx_container`
+
+To force cache refresh:
+```yaml
+args:
+  - CACHEBUST=1
+```
+
+---
+
+## 🔄 GitLab CI/CD Pipeline
+
+Defined in `.gitlab-ci.yml` and used to:
+1. Build both containers (`idh_container`, `nginx_container`)
+2. Run Pytest for backend
+3. Push tagged images to Docker Hub
+4. Deploy to your runner machine via Compose
+5. Manually clean up containers/images using `cleanup_app`
+
+---
+
+## 🔗 Related Docker Hub Links
+
+- [Docker Hub – IDH App (Gunicorn)](https://hub.docker.com/r/contactjawwad/idh-app/tags?page=1&name=idh)
+- [Docker Hub – NGINX Container](https://hub.docker.com/r/contactjawwad/idh-app/tags?page=1&name=nginx)
+
+---
+
+## 📷 Screenshots
+
+| Upload Page | Summary Report |
+|-------------|----------------|
+| ![upload](app/static/images/select_and_report.png) | ![summary](app/static/images/summary_report.png) |
+
+---
+
+## 📚 Documentation
+
+- 📘 User Guide (`IDH_Connect_User_Guide.docx`)
+- 🧱 Software Design Document (`InventoryHub_SDD_Draft.docx`)
+- 📊 Demo Presentation (`IDH Demo Presentation.pptx`)
+
+---
+
+## 📬 Maintainer
+
+Jawwad Qureshi  
+📧 jawwad.qureshi@nokia.com  
+📞 +61 481 592 790  
+
+---
+
+## 📜 License
+
+This is a proprietary project. Please contact the maintainer for any reuse or redistribution inquiries.
