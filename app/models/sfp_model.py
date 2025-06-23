@@ -52,8 +52,13 @@ class SFPModel:
             '3HE14835AA': 'SFP28 25GE LR - LC ROHS6/6 -40/85C',
             '3HE15272AA': 'QSFP56-DD - 400G FR4 2km 0/70C',
             '3HE16558AA': 'QSFP28 - 100GE ZR4 0/70C',
-            '3HE17069AA': 'QSFP28 - SFP TRANSCEIVER - TELECOM'
-        }
+            '3HE17069AA': 'QSFP28 - 100G 4WDM 40km -40/85C',
+            '3HE00868CB': 'SFP - GIGE BX10-D - LC R6/6 DDM -40/85C',
+            '3HE12111BB': 'SFP+ 10GE BX20-D LC -40/85C',
+            '3HE12111BA': 'SFP+ 10GE BX20-U LC -40/85C',
+            '3HE05037BB': 'SFP+ 10GE BX10-D LC -40/85C',
+            '3HE05037BA': 'SFP+ 10GE BX10-U LC -40/85C'
+        }               
 
         
         
