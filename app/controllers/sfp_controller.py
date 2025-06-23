@@ -60,6 +60,7 @@ class SFPController(BaseController):
         return jsonify({'data': table_data, 'summary_data': summary_data, 'all_data_fetched': all_data_fetched})
         
     def export_sfp_report(self):
+        #This Function is used for generating report
         try:
             current_app.logger.info('EXPORT START')
             uploaded_files = session.get('temp_files', [])
