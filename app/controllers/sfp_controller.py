@@ -8,6 +8,7 @@ import tempfile
 import pandas as pd
 from io import BytesIO
 from openpyxl import Workbook
+from openpyxl.styles import  Border, Side
 
 
 sfp_blueprint=Blueprint('sfp',__name__)
@@ -60,27 +61,22 @@ class SFPController(BaseController):
         return jsonify({'data': table_data, 'summary_data': summary_data, 'all_data_fetched': all_data_fetched})
         
     def export_sfp_report(self):
-        #This Function is used for generating report
         try:
-            current_app.logger.info('EXPORT START')
+            # … your existing code to fetch table_data & summary_data …
+            # 1) Use a normal Workbook so we can style cells
             uploaded_files = session.get('temp_files', [])
-            temp_dir = current_app.config['temp_dir']
-
-            # 1) Fetch all data
+            temp_dir        = current_app.config['temp_dir']
             table_data, summary_data, _ = self.service.process_files(
-                uploaded_files, temp_dir, start=0, chunk_size=10**9
-            )
-            current_app.logger.info(f'DONE PROCESSING {len(table_data)} rows')
+            uploaded_files, temp_dir, start=0, chunk_size=10**4
+        )
 
-            # 2) Create a write-only workbook
-            wb = Workbook(write_only=True)
+            wb = Workbook()
+            ws_main = wb.active
+            ws_main.title = 'Main Report'
 
-            # --- Main Report sheet ---
-            ws_main = wb.create_sheet('Main Report')
-            ws_main.append([
-                'Site Name','Connector Type','Part Number',
-                'Vendor Serial Number','Description','Shelf Type'
-            ])
+            # 2) Append your headers + data
+            headers = ['Site Name','Connector Type','Part Number','Vendor Serial Number','Description','Shelf Type']
+            ws_main.append(headers)
             for row in table_data:
                 ws_main.append([
                     row.get('Site Name'),
@@ -91,20 +87,31 @@ class SFPController(BaseController):
                     row.get('Shelf Type', '')
                 ])
 
-            # --- Summary Report sheet ---
+            # 3) Create a second sheet for summary
             ws_sum = wb.create_sheet('Summary Report')
             ws_sum.append(['Part Number','QTY','Description'])
             for pn, info in summary_data.items():
                 ws_sum.append([pn, info['QTY'], info['Description']])
 
-            current_app.logger.info('ABOUT TO STREAM EXCEL')
-            # 3) Save workbook into a BytesIO
+            # 4) Define a thin black border
+            thin_border = Border(
+                left=Side(style='thin', color='000000'),
+                right=Side(style='thin', color='000000'),
+                top=Side(style='thin', color='000000'),
+                bottom=Side(style='thin', color='000000')
+            )
+
+            # 5) Apply it to every cell in both sheets
+            for sheet in (ws_main, ws_sum):
+                for row in sheet.iter_rows(min_row=1, max_row=sheet.max_row, 
+                                        min_col=1, max_col=sheet.max_column):
+                    for cell in row:
+                        cell.border = thin_border
+
+            # 6) Stream it out as before
             output = BytesIO()
             wb.save(output)
             output.seek(0)
-            current_app.logger.info('EXCEL READY, SENDING')
-
-            # 4) Return as response
             return send_file(
                 output,
                 as_attachment=True,
@@ -115,3 +122,5 @@ class SFPController(BaseController):
         except Exception:
             current_app.logger.exception('Failed to export SFP report')
             return jsonify({'error': 'Export failed on server'}), 500
+
+        
