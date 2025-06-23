@@ -144,30 +144,17 @@ Defined in `.gitlab-ci.yml` and used to:
 
 ---
 
-## 📷 Screenshots
-
-| Upload Page | Summary Report |
-|-------------|----------------|
-| ![upload](app/static/images/select_and_report.png) | ![summary](app/static/images/summary_report.png) |
-
----
-
-## 📚 Documentation
-
-- 📘 User Guide (`IDH_Connect_User_Guide.docx`)
-- 🧱 Software Design Document (`InventoryHub_SDD_Draft.docx`)
-- 📊 Demo Presentation (`IDH Demo Presentation.pptx`)
-
 ---
 
 ## 📬 Maintainer
 
 Jawwad Qureshi  
-📧 jawwad.qureshi@nokia.com  
+📧 contactjawwad@gmail.com  
 📞 +61 481 592 790  
 
 ---
 
 ## 📜 License
 
-This is a proprietary project. Please contact the maintainer for any reuse or redistribution inquiries.
+This project is licensed under the [MIT License](LICENSE).  
+You are free to use, modify, and distribute this software with attribution.
